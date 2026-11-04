@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Microlearn</title><meta name="robots" content="noindex">
+<script>
+/* App Microlearn (app.microlearn.website): pages that are not in the app yet open on the public site (Google Sites). */
+(function () {
+  var p = location.pathname.replace(/^\/+|\/+$/g, "").split("/")[0] || "";
+  var known = /^(py|stats|phys|chem|pt|es)$/.test(p);
+  location.replace("https://www.microlearn.website/" + (known ? p : "") + location.hash);
+})();
+</script>
+<style>body{font:16px system-ui,sans-serif;margin:40px;color:#222}</style></head>
+<body><p>Opening Microlearn… <a href="https://www.microlearn.website/">www.microlearn.website</a></p></body></html>
