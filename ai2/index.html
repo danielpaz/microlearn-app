@@ -6147,17 +6147,18 @@ window.__MICRO_CERT={"p": "ai2", "api": "https://script.google.com/macros/s/AKfy
   function api(action, body) {
     body = body || {}; body.action = action; body.token = tok; body.p = C.p; body.lang = lang();
     return fetch(C.api, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(body) })
-      .then(function (r) { return r.json(); })
+      .then(function (r) { return r.text().then(function (x) { try { return JSON.parse(x); } catch (e) { var er = new Error("HTTP " + r.status + ", " + (/<html/i.test(x) ? "HTML" : "not JSON")); er.code = "server"; er.info = er.message; throw er; } }); })
       .then(function (j) { if (!j.ok) { var e = new Error(j.error || "server"); e.code = j.error; e.info = j.message; throw e; } return j; });
   }
-  function fail(e) { if (e && e.code === "auth") { tok = null; try { sessionStorage.removeItem(TOKKEY); } catch (x) {} lastErr = t("auth"); } else lastErr = t("err"); busy = false; render(); }
+  function why(e) { return e && e.code ? " (" + e.code + (e.info && e.info !== e.code ? ": " + e.info : "") + ")" : e && e.message ? " (" + e.message + ")" : ""; }
+  function fail(e) { if (e && e.code === "auth") { tok = null; try { sessionStorage.removeItem(TOKKEY); } catch (x) {} lastErr = t("auth"); } else lastErr = t("err") + why(e); busy = false; try { console.warn("[MicroCert]", e); } catch (x) {} render(); }
   var syncing = false;
   function sync() { // envia lições concluídas que o servidor ainda não tem
     if (!app || !tok || syncing) return Promise.resolve();
     var mine = localDone(), have = (STATUS && STATUS.done) || [], miss = mine.filter(function (id) { return have.indexOf(id) < 0; });
     if (STATUS && !miss.length) return Promise.resolve();
     syncing = true;
-    return api("progress.mark", { lessons: miss }).then(function (j) { STATUS = j.status; syncing = false; if (!view.hidden && !run) render(); }, function (e) { syncing = false; if (e && e.code === "auth") fail(e); });
+    return api("progress.mark", { lessons: miss }).then(function (j) { STATUS = j.status; syncing = false; if (!view.hidden && !run) render(); }, function (e) { syncing = false; fail(e); });
   }
   function refresh() { lastErr = ""; STATUS = null; busy = true; render(); sync().then(function () { busy = false; render(); }); }
 
