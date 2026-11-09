@@ -1201,7 +1201,7 @@ boot();
   window.MicroNano = { open: open, close: close, key: KEY, size: Q.length };
 })();</script>
 <script data-micro-foot>
-/* .Micro footer line (standard 5.3, 2026-11-04): "Part of MicroLearn.website" as the last line of the footer, linking to the portal.
+/* .Micro footer line (standard 5.3, 2026-11-04; v2 2026-11-09: trims dangling "Part of" text, app font, divider): "Part of MicroLearn.website" as the last line of the footer, linking to the portal.
    Link: "/" (site and microlearn.website.html) · "microlearn.website.html" (offline package, file://) · inside an embed, data-micro-nav sends it to the Google Sites home page.
    Hides the old "Part of the Microlearn network" badge and any other portal link in the footer, so the portal is mentioned once. */
 (function () {
@@ -1209,7 +1209,7 @@ boot();
   var TX = { en: "Part of", pt: "Parte do", es: "Parte de" };
   var HREF = location.protocol === "file:" ? "microlearn.website.html" : "/";
   var st = document.createElement("style");
-  st.textContent = ".mf-line{display:block!important;width:100%;box-sizing:border-box;margin:14px 0 0!important;padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px))!important;text-align:center!important;font:400 .85rem/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif!important;opacity:.78;color:inherit;clear:both;order:9999}" +
+  st.textContent = ".mf-line{display:block!important;width:100%;box-sizing:border-box;margin:10px 0 0!important;padding:10px 16px calc(12px + env(safe-area-inset-bottom,0px))!important;text-align:center!important;font-family:inherit!important;font-size:.85rem!important;font-weight:400!important;line-height:1.5!important;opacity:.8;border-top:1px solid color-mix(in srgb,currentColor 12%,transparent);color:inherit;clear:both;order:9999}" +
     ".mf-line a{color:var(--mf-acc,inherit)!important;font-weight:600;text-decoration:none!important}.mf-line a:hover,.mf-line a:focus-visible{text-decoration:underline!important}" +
     "footer.mf-own{display:block;border:0;background:none}";
   document.head.appendChild(st);
@@ -1221,12 +1221,22 @@ boot();
     return /^https?:\/\/(www\.)?microlearn\.website\/?(#.*)?$/i.test(h) || /^https?:\/\/(www\.)?learnware\.online/i.test(h);
   }
   function hide(el) { if (el.getAttribute("data-mf-old") == null) { el.setAttribute("data-mf-old", ""); el.style.setProperty("display", "none", "important"); } }
+  // text left dangling before a hidden portal link ("· Part of", "part of the .Micro family at", "Parte do"...) is trimmed (v2, 2026-11-09)
+  var LEAD = /\s*[·•|—–\-,]?\s*(?:(?:an?|un[ao]?|uma?)\s+)?(?:part of|parte d[aeo]|parte de)(?:\s+(?:the|la|a|o))?(?:\s+(?:\.micro\s+family|fam[ií]lia\s+\.micro|red|rede|network))?(?:\s+(?:at|em|en|no|na|de|del|da|do))?\s*$/i;
+  function trimLead(a) {
+    var n = a.previousSibling;
+    while (n && n.nodeType === 3 && !n.textContent.trim()) n = n.previousSibling;
+    if (!n || n.nodeType !== 3) return;
+    var t = n.textContent, u = t.replace(LEAD, "");
+    if (u !== t) n.textContent = u.replace(/\s*[·•|—–\-,]\s*$/, "");
+  }
   function cleanOld(f) {
     [].forEach.call(f.querySelectorAll('[class*="lw-"],[id^="lw-"],[data-lw]'), function (el) { if (!el.closest(".mf-line")) hide(el); });
     [].forEach.call(f.querySelectorAll("a[href]"), function (a) {
       if (a.closest(".mf-line") || a.closest("nav")) return;
       if (isPortal(a) && /micro\s*learn|learnware/i.test(a.textContent)) {
         hide(a);
+        trimLead(a);
         var p = a.parentElement;
         while (p && p !== f && !p.closest(".mf-line")) {
           var txt = [].map.call(p.childNodes, function (n) { return n.nodeType === 3 ? n.textContent : (n.getAttribute && n.getAttribute("data-mf-old") != null) ? "" : n.textContent; }).join("");
