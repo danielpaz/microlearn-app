@@ -5,7 +5,7 @@
 /* App Microlearn (app.microlearn.website): pages that are not in the app yet open on the public site (Google Sites). */
 (function () {
   var p = location.pathname.replace(/^\/+|\/+$/g, "").split("/")[0] || "";
-  var known = /^(py|stats|phys|chem|pt|es)$/.test(p);
+  var known = /^(py|pt|es)$/.test(p);
   location.replace("https://www.microlearn.website/" + (known ? p : "") + location.hash);
 })();
 </script>
