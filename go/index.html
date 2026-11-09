@@ -1476,6 +1476,7 @@ boot();
     return /^https?:\/\/(www\.)?microlearn\.website\/?(#.*)?$/i.test(h) || /^https?:\/\/(www\.)?learnware\.online/i.test(h);
   }
   function hide(el) { if (el.getAttribute("data-mf-old") == null) { el.setAttribute("data-mf-old", ""); el.style.setProperty("display", "none", "important"); } }
+  // text left dangling before a hidden portal link ("· Part of", "part of the .Micro family at", "Parte do"...) is trimmed (v2, 2026-11-09)
   var LEAD = /\s*[·•|—–\-,]?\s*(?:(?:an?|un[ao]?|uma?)\s+)?(?:part of|parte d[aeo]|parte de)(?:\s+(?:the|la|a|o))?(?:\s+(?:\.micro\s+family|fam[ií]lia\s+\.micro|red|rede|network))?(?:\s+(?:at|em|en|no|na|de|del|da|do))?\s*$/i;
   function trimLead(a) {
     var n = a.previousSibling;
@@ -1489,7 +1490,8 @@ boot();
     [].forEach.call(f.querySelectorAll("a[href]"), function (a) {
       if (a.closest(".mf-line") || a.closest("nav")) return;
       if (isPortal(a) && /micro\s*learn|learnware/i.test(a.textContent)) {
-        hide(a); trimLead(a);
+        hide(a);
+        trimLead(a);
         var p = a.parentElement;
         while (p && p !== f && !p.closest(".mf-line")) {
           var txt = [].map.call(p.childNodes, function (n) { return n.nodeType === 3 ? n.textContent : (n.getAttribute && n.getAttribute("data-mf-old") != null) ? "" : n.textContent; }).join("");
