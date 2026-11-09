@@ -1359,27 +1359,76 @@ boot();
   window.MicroNano = { open: open, close: close, key: KEY, size: Q.length };
 })();</script>
 <script data-micro-foot>
-/* .Micro footer line (standard 5.3, 2026-11-04; v2 2026-11-09: trims dangling "Part of" text, app font, divider): "Part of MicroLearn.website" as the last line of the footer, linking to the portal.
-   Link: "/" (site and microlearn.website.html) · "microlearn.website.html" (offline package, file://) · inside an embed, data-micro-nav sends it to the Google Sites home page.
-   Hides the old "Part of the Microlearn network" badge and any other portal link in the footer, so the portal is mentioned once. */
+/* .Micro footer (standard 5.3, v3 2026-11-09; aligned to the app footer's own margins): the .Micro family as a strip of the periodic table, with the current platform's category highlighted,
+   plus "Part of MicroLearn.website · 17 platforms". Tiles link to /<project> (site), X.Micro.html (offline package, file://);
+   inside an embed, data-micro-nav sends them to https://www.microlearn.website/<project>.
+   Hides the old "Part of the Microlearn network" badge and other portal links in the footer, and trims the text left dangling before them. */
 (function () {
   if (window.MicroFoot) return;
-  var TX = { en: "Part of", pt: "Parte do", es: "Parte de" };
-  var HREF = location.protocol === "file:" ? "microlearn.website.html" : "/";
+  var CATS = [
+    ["code", "#2B44E0", "#8392FF", { en: "Code & computing", pt: "Programação e computação", es: "Programación y computación" }, ["ai2", "py", "gdev", "sql", "git"]],
+    ["data", "#D9480F", "#FF8A55", { en: "Data & numbers", pt: "Dados e números", es: "Datos y números" }, ["ds", "stats", "fin"]],
+    ["sci", "#C2255C", "#F783AC", { en: "Science", pt: "Ciências", es: "Ciencias" }, ["phys", "chem", "astro"]],
+    ["elec", "#2B8A3E", "#69DB7C", { en: "Electronics & logic", pt: "Eletrônica e lógica", es: "Electrónica y lógica" }, ["circuit", "mcu"]],
+    ["games", "#7048E8", "#B197FC", { en: "Games & music", pt: "Jogos e música", es: "Juegos y música" }, ["chess", "go", "check", "music"]]
+  ];
+  var P = [["ai2", "01", "Ap", "AI2"], ["ds", "02", "Ds", "DS"], ["gdev", "03", "Gv", "GDev"], ["stats", "04", "St", "Stats"], ["mcu", "05", "Mc", "MCU"],
+    ["circuit", "06", "Ci", "Circuit"], ["phys", "07", "Ph", "Phys"], ["chem", "08", "Ch", "Chem"], ["chess", "09", "Cs", "Chess"], ["sql", "10", "Sq", "SQL"],
+    ["fin", "11", "Fn", "Fin"], ["go", "12", "Go", "Go"], ["check", "13", "Ck", "Check"], ["music", "14", "Mu", "Music"], ["astro", "15", "As", "Astro"],
+    ["git", "16", "Gt", "Git"], ["py", "17", "Py", "Py"]];
+  var TX = {
+    en: { part: "Part of", more: "Keep exploring", n: "17 platforms", nav: "MicroLearn platforms" },
+    pt: { part: "Parte do", more: "Continue explorando", n: "17 plataformas", nav: "Plataformas do MicroLearn" },
+    es: { part: "Parte de", more: "Sigue explorando", n: "17 plataformas", nav: "Plataformas de MicroLearn" }
+  };
+  var CAT_OF = {}; CATS.forEach(function (c) { c[4].forEach(function (id) { CAT_OF[id] = c; }); });
+  var BY = {}; P.forEach(function (p) { BY[p[0]] = p; });
+  var FILE = location.protocol === "file:";
+  var HREF = FILE ? "microlearn.website.html" : "/";
+  function link(id) { return FILE ? BY[id][3] + ".Micro.html" : "/" + id; }
   var st = document.createElement("style");
-  st.textContent = ".mf-line{display:block!important;width:100%;box-sizing:border-box;margin:10px 0 0!important;padding:10px 16px calc(12px + env(safe-area-inset-bottom,0px))!important;text-align:center!important;font-family:inherit!important;font-size:.85rem!important;font-weight:400!important;line-height:1.5!important;opacity:.8;border-top:1px solid color-mix(in srgb,currentColor 12%,transparent);color:inherit;clear:both;order:9999}" +
-    ".mf-line a{color:var(--mf-acc,inherit)!important;font-weight:600;text-decoration:none!important}.mf-line a:hover,.mf-line a:focus-visible{text-decoration:underline!important}" +
-    "footer.mf-own{display:block;border:0;background:none}";
+  st.textContent =
+    ".mf-line{display:block!important;width:100%;box-sizing:border-box;margin:12px 0 0!important;padding:14px 16px calc(14px + env(safe-area-inset-bottom,0px))!important;font-family:inherit!important;font-size:.85rem!important;font-weight:400!important;line-height:1.5!important;color:inherit;text-align:left!important;border-top:1px solid color-mix(in srgb,currentColor 12%,transparent);clear:both;order:9999}" +
+    ".mf-in{margin:0}" +
+    ".mf-top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:4px 16px;margin:0 0 10px}" +
+    ".mf-cat,.mf-part{opacity:.82}.mf-cat b{font-weight:600}" +
+    ".mf-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--mf-cc,currentColor);margin-right:7px;vertical-align:1px}" +
+    ".mf-line a.mf-a{color:var(--mf-acc,inherit)!important;font-weight:600;text-decoration:none!important}.mf-line a.mf-a:hover,.mf-line a.mf-a:focus-visible{text-decoration:underline!important}" +
+    ".mf-row{display:flex;gap:6px;overflow-x:auto;padding:3px 2px 6px;margin:0;scrollbar-width:thin;-webkit-overflow-scrolling:touch}" +
+    ".mf-line .mf-tile{position:relative;flex:0 0 auto;width:42px;height:46px;box-sizing:border-box;border-radius:7px;border:1px solid color-mix(in srgb,currentColor 18%,transparent);display:flex;align-items:center;justify-content:center;color:inherit!important;text-decoration:none!important;background:none;opacity:.42;transition:opacity .15s,transform .15s}" +
+    ".mf-line .mf-tile.mf-same{opacity:1}.mf-line a.mf-tile:hover,.mf-line a.mf-tile:focus-visible{opacity:1;transform:translateY(-2px)}" +
+    ".mf-tile s{position:absolute;top:3px;left:5px;font-size:9px;line-height:1;text-decoration:none;opacity:.6}" +
+    ".mf-tile b{font-size:15px;font-weight:600;line-height:1;letter-spacing:-.01em}" +
+    ".mf-tile i{position:absolute;left:-1px;right:-1px;bottom:-1px;height:4px;border-radius:0 0 7px 7px;background:var(--c)}" +
+    ".mf-line .mf-tile.mf-on{border:2px solid var(--c);background:color-mix(in srgb,var(--c) 12%,transparent)}.mf-tile.mf-on i{left:-2px;right:-2px;bottom:-2px}" +
+    "footer.mf-own{display:block;border:0;background:none}" +
+    "@media (max-width:560px){.mf-top{flex-direction:column;gap:2px}.mf-line .mf-tile{width:40px;height:44px}}";
   document.head.appendChild(st);
   function lang() { var l = (document.documentElement.lang || "en").slice(0, 2).toLowerCase(); return TX[l] ? l : "en"; }
   function vis(el) { return !!(el.offsetParent || el.getClientRects().length); }
+  function self() {
+    var s = window.MicroNav && window.MicroNav.self;
+    if (BY[s]) return s;
+    var seg = (location.pathname.split("/").filter(Boolean)[0] || "").toLowerCase();
+    if (BY[seg]) return seg;
+    var f = (location.pathname.match(/([\w]+)\.micro\.html$/i) || document.title.match(/^\s*([\w]+)\.Micro/i) || [])[1];
+    f = (f || "").toLowerCase();
+    return BY[f] ? f : "";
+  }
+  function dark(el) {
+    while (el && el.nodeType === 1) {
+      var m = (getComputedStyle(el).backgroundColor || "").match(/[\d.]+/g);
+      if (m && (m.length < 4 || +m[3] > 0.5)) return (0.299 * m[0] + 0.587 * m[1] + 0.114 * m[2]) < 128;
+      el = el.parentElement;
+    }
+    return false;
+  }
   function isPortal(a) {
     var h = (a.getAttribute("href") || "").trim();
     if (/^(\/|\.\/|\.\.\/|\.\.\/\.\.\/|\/(pt|es)\/?|microlearn\.website\.html)(#.*)?$/i.test(h)) return true;
     return /^https?:\/\/(www\.)?microlearn\.website\/?(#.*)?$/i.test(h) || /^https?:\/\/(www\.)?learnware\.online/i.test(h);
   }
   function hide(el) { if (el.getAttribute("data-mf-old") == null) { el.setAttribute("data-mf-old", ""); el.style.setProperty("display", "none", "important"); } }
-  // text left dangling before a hidden portal link ("· Part of", "part of the .Micro family at", "Parte do"...) is trimmed (v2, 2026-11-09)
   var LEAD = /\s*[·•|—–\-,]?\s*(?:(?:an?|un[ao]?|uma?)\s+)?(?:part of|parte d[aeo]|parte de)(?:\s+(?:the|la|a|o))?(?:\s+(?:\.micro\s+family|fam[ií]lia\s+\.micro|red|rede|network))?(?:\s+(?:at|em|en|no|na|de|del|da|do))?\s*$/i;
   function trimLead(a) {
     var n = a.previousSibling;
@@ -1393,8 +1442,7 @@ boot();
     [].forEach.call(f.querySelectorAll("a[href]"), function (a) {
       if (a.closest(".mf-line") || a.closest("nav")) return;
       if (isPortal(a) && /micro\s*learn|learnware/i.test(a.textContent)) {
-        hide(a);
-        trimLead(a);
+        hide(a); trimLead(a);
         var p = a.parentElement;
         while (p && p !== f && !p.closest(".mf-line")) {
           var txt = [].map.call(p.childNodes, function (n) { return n.nodeType === 3 ? n.textContent : (n.getAttribute && n.getAttribute("data-mf-old") != null) ? "" : n.textContent; }).join("");
@@ -1407,11 +1455,23 @@ boot();
       if (/^\s*(part of the microlearn network|parte da rede microlearn|parte de la red microlearn)\s*$/i.test(el.textContent)) hide(el);
     });
   }
-  var line = null, busy = false;
-  function make() {
-    var d = document.createElement("div"); d.className = "mf-line"; d.setAttribute("data-micro-foot", "");
-    d.innerHTML = '<span class="mf-t"></span> <a class="mf-a" href="' + HREF + '">MicroLearn.website</a>'; return d;
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function build(l, me, dk) {
+    var t = TX[l], cat = CAT_OF[me], ci = dk ? 2 : 1;
+    var tiles = P.map(function (p) {
+      var c = CAT_OF[p[0]], col = c[ci], same = !cat || c === cat, on = p[0] === me;
+      var inner = "<s>" + p[1] + "</s><b>" + p[2] + "</b><i></i>";
+      var cls = "mf-tile" + (same ? " mf-same" : "") + (on ? " mf-on" : "");
+      var tip = esc(p[3] + ".Micro · " + c[3][l]);
+      return on ? '<span class="' + cls + '" style="--c:' + col + '" title="' + tip + '" aria-current="page">' + inner + "</span>"
+                : '<a class="' + cls + '" style="--c:' + col + '" href="' + link(p[0]) + '" title="' + tip + '" aria-label="' + tip + '">' + inner + "</a>";
+    }).join("");
+    var left = cat ? '<span class="mf-cat" style="--mf-cc:' + cat[ci] + '"><i class="mf-dot"></i><b>' + esc(cat[3][l]) + "</b> · " + esc(t.more) + "</span>"
+                   : '<span class="mf-cat">' + esc(t.more) + "</span>";
+    return '<div class="mf-in"><div class="mf-top">' + left + '<span class="mf-part"><span class="mf-t">' + esc(t.part) + '</span> <a class="mf-a" href="' + HREF + '">MicroLearn.website</a> · ' + esc(t.n) + "</span></div>" +
+      '<div class="mf-row" role="navigation" aria-label="' + esc(t.nav) + '">' + tiles + "</div></div>";
   }
+  var line = null, key = "", busy = false;
   function host() {
     var fs = [].filter.call(document.querySelectorAll("footer"), function (f) { return !f.closest("nav") && !f.closest("[data-micro-nano-view],.mn-in"); });
     var v = fs.filter(vis);
@@ -1423,6 +1483,21 @@ boot();
     if (own.parentNode !== m || m.lastElementChild !== own) m.appendChild(own);
     return own;
   }
+  function align(f) {
+    var fr = f.getBoundingClientRect(), fs = getComputedStyle(f), L = 1e9, R = -1e9;
+    var bl = fr.left + parseFloat(fs.paddingLeft || 0) + parseFloat(fs.borderLeftWidth || 0), br = fr.right - parseFloat(fs.paddingRight || 0) - parseFloat(fs.borderRightWidth || 0);
+    [].forEach.call(f.children, function (c) {
+      if (c === line || !vis(c) || !c.textContent.trim()) return;
+      var r = c.getBoundingClientRect(), cs = getComputedStyle(c);
+      if (r.width < (br - bl) * 0.5) return;
+      L = Math.min(L, r.left + parseFloat(cs.paddingLeft || 0)); R = Math.max(R, r.right - parseFloat(cs.paddingRight || 0));
+    });
+    var pl, pr;
+    if (L < 1e9 && R > L) { pl = Math.max(0, Math.round(L - bl)); pr = Math.max(0, Math.round(br - R)); }
+    else { pl = pr = (bl - fr.left) < 8 ? 16 : 0; }
+    var v = pl + "px " + pr + "px";
+    if (line.getAttribute("data-mf-pad") !== v) { line.setAttribute("data-mf-pad", v); line.style.setProperty("padding-left", pl + "px", "important"); line.style.setProperty("padding-right", pr + "px", "important"); }
+  }
   function acc() {
     var on = document.querySelector("nav .mstd-on") || document.querySelector("nav .mstd-item");
     var c = on ? getComputedStyle(on).color : "";
@@ -1433,12 +1508,16 @@ boot();
     try {
       var f = host();
       [].forEach.call(document.querySelectorAll(".mf-line"), function (el) { if (el !== line || el.parentNode !== f) el.remove(); });
-      if (!line) line = make();
+      if (!line) { line = document.createElement("div"); line.className = "mf-line"; line.setAttribute("data-micro-foot", ""); }
       if (line.parentNode !== f || f.lastElementChild !== line) f.appendChild(line);
-      var t = TX[lang()], s = line.querySelector(".mf-t"); if (s.textContent !== t) s.textContent = t;
-      line.setAttribute("lang", lang());
+      var l = lang(), me = self(), dk = dark(f), k = l + "|" + me + "|" + dk;
+      if (k !== key) {
+        key = k; line.innerHTML = build(l, me, dk); line.setAttribute("lang", l);
+        var on = line.querySelector(".mf-on"), row = line.querySelector(".mf-row");
+        if (on && row && row.scrollWidth > row.clientWidth) row.scrollLeft = Math.max(0, on.offsetLeft - row.clientWidth / 2);
+      }
       [].forEach.call(document.querySelectorAll("footer"), cleanOld);
-      acc();
+      align(f); acc();
     } finally { setTimeout(function () { busy = false; }, 0); }
   }
   var q = 0;
